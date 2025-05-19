@@ -1,0 +1,42 @@
+{
+  "name": "robotframework-mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol implementation for Robot Framework",
+  "main": "src/index.js",
+  "bin": {
+    "robotframework-mcp": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "robot-framework",
+    "mcp",
+    "selenium",
+    "testing",
+    "automation",
+    "ai",
+    "claude",
+    "goose"
+  ],
+  "author": "irkham <irkhamlearning@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "child_process": "^1.0.2",
+    "path": "^0.12.7"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/robotframework-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/robotframework-mcp/issues"
+  },
+  "homepage": "https://github.com/yourusername/robotframework-mcp#readme"
+}
