@@ -50,8 +50,23 @@ robotframework-mcp
 
 Options:
 - `--port, -p <number>`: Port to listen on (default: 3000)
+- `--auto-port, -a`: Automatically find an available port if the specified one is busy
 - `--help, -h`: Display help message
 - `--version, -v`: Display version information
+
+#### Troubleshooting Port Conflicts
+
+If you see an error like `EADDRINUSE: address already in use`, it means the default port (3000) is already being used by another application. You can:
+
+1. Specify a different port:
+   ```bash
+   robotframework-mcp --port 3001
+   ```
+
+2. Use the auto-port feature to automatically find an available port:
+   ```bash
+   robotframework-mcp --auto-port
+   ```
 
 ### Programmatic Usage
 
@@ -64,6 +79,28 @@ const { startServer } = require('robotframework-mcp');
 startServer(3000);
 
 // Now you can use MCP clients to interact with Robot Framework
+```
+
+For handling port conflicts programmatically, you can implement your own port detection logic or catch the error and retry with a different port:
+
+```javascript
+const { startServer } = require('robotframework-mcp');
+
+function startServerWithRetry(port, maxRetries = 5) {
+  try {
+    startServer(port);
+    console.log(`Server started on port ${port}`);
+  } catch (error) {
+    if (error.code === 'EADDRINUSE' && maxRetries > 0) {
+      console.log(`Port ${port} in use, trying ${port + 1}...`);
+      startServerWithRetry(port + 1, maxRetries - 1);
+    } else {
+      throw error;
+    }
+  }
+}
+
+startServerWithRetry(3000);
 ```
 
 ### Use with MCP clients

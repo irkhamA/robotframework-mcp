@@ -14,6 +14,7 @@ const sessions = new Map();
 /**
  * Start the MCP server
  * @param {number} port - The port to listen on
+ * @returns {object} - The server instance
  */
 function startServer(port) {
   const app = express();
@@ -46,8 +47,22 @@ function startServer(port) {
     res.json({ status: 'ok' });
   });
   
-  // Start server
-  const server = app.listen(port, () => {
+  // Start server with error handling
+  const server = app.listen(port);
+  
+  // Handle errors during startup
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Error: Port ${port} is already in use.`);
+      console.error('Try using a different port or the --auto-port option.');
+      throw error;
+    } else {
+      console.error(`Error starting server: ${error.message}`);
+      throw error;
+    }
+  });
+  
+  server.on('listening', () => {
     console.log(`MCP Robot Framework server running on port ${port}`);
   });
   
@@ -69,6 +84,8 @@ function startServer(port) {
       process.exit(0);
     });
   });
+  
+  return server;
 }
 
 module.exports = { startServer }; 

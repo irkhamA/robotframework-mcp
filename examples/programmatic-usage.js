@@ -8,10 +8,52 @@
 // Import the robotframework-mcp package
 // In a real project, you would use: const rfMcp = require('robotframework-mcp');
 const rfMcp = require('../src/index');
+const net = require('net');
 
-// Start the MCP server on port 3001
-rfMcp.startServer(3001);
-console.log('Robot Framework MCP server started on port 3001');
+/**
+ * Check if a port is available
+ * @param {number} port - The port to check
+ * @returns {Promise<boolean>} - True if the port is available
+ */
+async function isPortAvailable(port) {
+  return new Promise((resolve) => {
+    const server = net.createServer()
+      .once('error', () => {
+        // Port is not available
+        resolve(false);
+      })
+      .once('listening', () => {
+        // Port is available, close the server
+        server.close(() => resolve(true));
+      })
+      .listen(port);
+  });
+}
+
+/**
+ * Start the MCP server with port conflict handling
+ * @param {number} preferredPort - The preferred port to use
+ * @returns {Promise<number>} - The port that was actually used
+ */
+async function startMCPServer(preferredPort = 3001) {
+  // Check if the preferred port is available
+  if (await isPortAvailable(preferredPort)) {
+    rfMcp.startServer(preferredPort);
+    console.log(`Robot Framework MCP server started on port ${preferredPort}`);
+    return preferredPort;
+  } else {
+    // Find the next available port
+    for (let port = preferredPort + 1; port < preferredPort + 10; port++) {
+      if (await isPortAvailable(port)) {
+        rfMcp.startServer(port);
+        console.log(`Preferred port ${preferredPort} was in use.`);
+        console.log(`Robot Framework MCP server started on port ${port}`);
+        return port;
+      }
+    }
+    throw new Error(`Could not find an available port after trying 10 ports starting from ${preferredPort}`);
+  }
+}
 
 // Create a map to store sessions (simulate the server's session storage)
 const sessions = new Map();
@@ -19,6 +61,9 @@ const sessions = new Map();
 // Example of programmatic usage
 async function runDemo() {
   try {
+    // Start the MCP server with port conflict handling
+    await startMCPServer(3001);
+    
     // Start a browser session
     console.log('Starting browser...');
     const browserResult = await rfMcp.browserTools.startBrowser({
@@ -88,5 +133,5 @@ async function runDemo() {
   process.exit(0);
 }
 
-// Wait for server to be ready before running the demo
-setTimeout(runDemo, 1000); 
+// Run the demo
+runDemo(); 
